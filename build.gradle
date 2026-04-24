@@ -23,7 +23,6 @@ repositories {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'com.github.jamilhossain97:demo:1.0.0'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
@@ -51,13 +50,15 @@ publishing {
 
     repositories {
         maven {
-            url = uri("https://maven.pkg.github.com/jamilhossain97/ci_cd_java_gradle")
+            name = "GitHubPackages"
+            url = "https://maven.pkg.github.com/${System.getenv('GITHUB_REPOSITORY')}"
+
             credentials {
-                username = "YOUR_GITHUB_USERNAME"
-                password = "YOUR_GITHUB_TOKEN"
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
             }
         }
-   }
+    }
 }
 
 tasks.withType(GenerateModuleMetadata).configureEach {
