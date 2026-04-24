@@ -41,6 +41,30 @@ jobs:
           name: app-${{ matrix.os }}
           path: build/libs/*.jar
 
+  # 🔹 DOCKER JOB (ubuntu only)
+  docker:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download JAR
+        uses: actions/download-artifact@v4
+        with:
+          name: app-ubuntu-latest
+          path: build/libs/
+
+      - name: Build and Push Docker Image
+        uses: mr-smithers-excellent/docker-build-push@v6
+        with:
+          image: jamilhossain97/ci_cd_java_gradle
+          tags: v1.0, latest
+          registry: docker.io
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
   # 🔹 PUBLISH JOB
   publish:
     needs: build
@@ -80,10 +104,7 @@ jobs:
 
   # 🔹 DEPENDENCY SUBMISSION JOB
   dependency-submission:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ubuntu-latest
     permissions:
       contents: write
 
@@ -98,7 +119,6 @@ jobs:
           distribution: 'temurin'
 
       - name: Grant execute permission for gradlew
-        if: runner.os != 'Windows'
         run: chmod +x gradlew
 
       - name: Submit dependency graph
